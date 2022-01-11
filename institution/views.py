@@ -13,9 +13,11 @@ from rest_framework import viewsets
 from django.http import Http404
 from collections import OrderedDict
 
+
 class FacultyViewset(viewsets.ModelViewSet):
-    serializer_class=FacultySerializer
-    queryset=Faculty.objects.all()
+    serializer_class = FacultySerializer
+    queryset = Faculty.objects.all()
+
 
 class FacultyList(APIView):
     #permission_classes = [permissions.IsAuthenticated]
@@ -31,10 +33,12 @@ class FacultyList(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+
+
 class CareerViewset(viewsets.ModelViewSet):
-    serializer_class=CareerSerializer
-    queryset=Career.objects.all()
+    serializer_class = CareerSerializer
+    queryset = Career.objects.all()
+
 
 class CareerList(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -51,39 +55,44 @@ class CareerList(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class OrganizationViewset(viewsets.ModelViewSet):
-    serializer_class=OrganizationSerializer
-    queryset=Organization.objects.all()
-    @action(detail=True,methods=['get'])
-    def suborganizaciones(self, request,pk=None):
-        filtered=SubOrganization.objects.filter(id_organization=pk)
-        page= self.paginate_queryset(filtered)
+    serializer_class = OrganizationSerializer
+    queryset = Organization.objects.all()
+    
+    @action(detail=True, methods=['get'])
+    def suborganizaciones(self, request, pk=None):
+        filtered = SubOrganization.objects.filter(id_organization=pk)
+        page = self.paginate_queryset(filtered)
         if page is not None:
-            serializer= SubOrganizationSerializer(page,many=True)
+            serializer = SubOrganizationSerializer(page, many=True)
             return self.get_paginated_response(serializer.data)
-        serializer=SubOrganizationSerializer(filtered,many=True)
+        serializer = SubOrganizationSerializer(filtered, many=True)
         return Response(serializer.data)
 
     def list(self, request, *args, **kwargs):
-        
+
         queryset = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(queryset)
+        params = self.request.query_params
+        
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(queryset, many=True)
-        only= self.request.query_params.get('only')
+        only = params.get('only')
         if only is not None:
-            datos=serializer.data
+            datos = serializer.data
             if only in datos[0].keys():
-                filtrado=[organizacion[only] for organizacion in datos]
+                filtrado = [organizacion[only] for organizacion in datos]
                 return Response(filtrado)
         return Response(serializer.data)
-        
+
+
 class OrganizationList(APIView):
     # permission_classes = [permissions.IsAuthenticated]
-    
+
     def get(self, request, format=None):
         queryset = Organization.objects.all()
         serializer = OrganizationSerializer(queryset, many=True)
@@ -96,9 +105,10 @@ class OrganizationList(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class OrganizationDetail(APIView):
     #permission_classes = [permissions.IsAuthenticated]
-    
+
     def get_object(self, pk):
         try:
             return Organization.objects.get(pk=pk)
@@ -109,7 +119,7 @@ class OrganizationDetail(APIView):
         organization = self.get_object(pk)
         serializer = OrganizationSerializer(organization)
         return Response(serializer.data)
-    
+
     def put(self, request, pk, format=None):
         organization = self.get_object(pk)
         serializer = OrganizationSerializer(organization, data=request.data)
@@ -123,15 +133,15 @@ class OrganizationDetail(APIView):
         organization.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-class SubOrganizationViewset(viewsets.ModelViewSet):
-    serializer_class=SubOrganizationSerializer
-    queryset=SubOrganization.objects.all()
 
+class SubOrganizationViewset(viewsets.ModelViewSet):
+    serializer_class = SubOrganizationSerializer
+    queryset = SubOrganization.objects.all()
 
 
 class SubOrganizationList(APIView):
     #permission_classes = [permissions.IsAuthenticated]
-    
+
     def get(self, request, format=None):
         queryset = SubOrganization.objects.all()
         serializer = SubOrganizationSerializer(queryset, many=True)
@@ -144,15 +154,16 @@ class SubOrganizationList(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class SubOrganizationDetail(APIView):
     #permission_classes = [permissions.IsAuthenticated]
-    
+
     def get_object(self, pk):
         try:
             return SubOrganization.objects.get(pk=pk)
         except SubOrganization.DoesNotExist:
-            raise Http404   
-    
+            raise Http404
+
     def get_by_org_object(self, id_organization):
         try:
             return SubOrganization.objects.filter(id_organization=id_organization)
@@ -167,7 +178,7 @@ class SubOrganizationDetail(APIView):
             sub_org = self.get_by_org_object(id_organization)
             serializer = SubOrganizationSerializer(sub_org, many=True)
         return Response(serializer.data)
-    
+
     def put(self, request, pk, format=None):
         sub_org = self.get_object(pk)
         serializer = SubOrganizationSerializer(sub_org, data=request.data)
@@ -180,4 +191,3 @@ class SubOrganizationDetail(APIView):
         sub_org = self.get_object(pk)
         sub_org.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-        

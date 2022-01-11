@@ -1,15 +1,24 @@
 from django.shortcuts import render
+
+from event.models import Document
 from .models import *
 from .serializers import *
 
+from rest_framework.decorators import action
 from rest_framework.views import APIView
 from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework import viewsets
 from django.http import Http404
+from collections import OrderedDict
+
+class FacultyViewset(viewsets.ModelViewSet):
+    serializer_class=FacultySerializer
+    queryset=Faculty.objects.all()
 
 class FacultyList(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    #permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, format=None):
         queryset = Faculty.objects.all()
@@ -23,6 +32,10 @@ class FacultyList(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
+class CareerViewset(viewsets.ModelViewSet):
+    serializer_class=CareerSerializer
+    queryset=Career.objects.all()
+
 class CareerList(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -38,6 +51,36 @@ class CareerList(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class OrganizationViewset(viewsets.ModelViewSet):
+    serializer_class=OrganizationSerializer
+    queryset=Organization.objects.all()
+    @action(detail=True,methods=['get'])
+    def suborganizaciones(self, request,pk=None):
+        filtered=SubOrganization.objects.filter(id_organization=pk)
+        page= self.paginate_queryset(filtered)
+        if page is not None:
+            serializer= SubOrganizationSerializer(page,many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer=SubOrganizationSerializer(filtered,many=True)
+        return Response(serializer.data)
+
+    def list(self, request, *args, **kwargs):
+        
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        only= self.request.query_params.get('only')
+        if only is not None:
+            datos=serializer.data
+            if only in datos[0].keys():
+                filtrado=[organizacion[only] for organizacion in datos]
+                return Response(filtrado)
+        return Response(serializer.data)
+        
 class OrganizationList(APIView):
     # permission_classes = [permissions.IsAuthenticated]
     
@@ -54,7 +97,7 @@ class OrganizationList(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class OrganizationDetail(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    #permission_classes = [permissions.IsAuthenticated]
     
     def get_object(self, pk):
         try:
@@ -80,8 +123,14 @@ class OrganizationDetail(APIView):
         organization.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+class SubOrganizationViewset(viewsets.ModelViewSet):
+    serializer_class=SubOrganizationSerializer
+    queryset=SubOrganization.objects.all()
+
+
+
 class SubOrganizationList(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    #permission_classes = [permissions.IsAuthenticated]
     
     def get(self, request, format=None):
         queryset = SubOrganization.objects.all()
@@ -96,7 +145,7 @@ class SubOrganizationList(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class SubOrganizationDetail(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    #permission_classes = [permissions.IsAuthenticated]
     
     def get_object(self, pk):
         try:

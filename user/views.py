@@ -23,26 +23,26 @@ class PersonList(APIView):
 
     def get(self, request, format=None):
         queryset = Person.objects.all()
-        serializer = PersonSerializer(queryset, many=True)
+        serializer = PersonManagerSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def post(self, request, format=None):
-        serializer = PersonSerializer(data=request.data)
+        serializer = PersonManagerSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ProfessorList(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    #permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, format=None):
         queryset = Professor.objects.all()
-        serializer = ProfessorSerializer(queryset, many=True)
+        serializer = ProfessorManagerSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def post(self, request, format=None):
-        serializer = ProfessorSerializer(data=request.data)
+        serializer = ProfessorManagerSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -53,11 +53,11 @@ class StudentList(APIView):
 
     def get(self, request, format=None):
         queryset = Student.objects.all()
-        serializer = StudentSerializer(queryset, many=True)
+        serializer = StudentManagerSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def post(self, request, format=None):
-        serializer = StudentSerializer(data=request.data)
+        serializer = StudentManagerSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)

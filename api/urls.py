@@ -15,7 +15,7 @@ urlpatterns = [
     path('', include('api.routers')),
     #path('carrera/', CareerList.as_view()),
     #path('organizacion/', OrganizationList.as_view()),
-    #path('organizacion/<str:pk>/', OrganizationDetail.as_view()),
+    path('organizacion/<str:pk>/miembros', AllMembersByOrgViewSet.as_view({'get': 'retrive'})),
     #path('suborganizacion/', SubOrganizationList.as_view()),
     #path('suborganizacion/<int:pk>/', SubOrganizationDetail.as_view()),
     #path('suborganizacion/<str:id_organization>/', SubOrganizationDetail.as_view()),

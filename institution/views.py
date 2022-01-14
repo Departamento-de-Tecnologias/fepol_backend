@@ -10,9 +10,11 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import viewsets
+from rest_framework import filters
 from django.http import Http404
+from django.core.exceptions import FieldError
 from collections import OrderedDict
-
+from django_filters.rest_framework import DjangoFilterBackend
 
 class FacultyViewset(viewsets.ModelViewSet):
     serializer_class = FacultySerializer
@@ -59,16 +61,6 @@ class CareerList(APIView):
 class OrganizationViewset(viewsets.ModelViewSet):
     serializer_class = OrganizationSerializer
     queryset = Organization.objects.all()
-    
-    @action(detail=True, methods=['get'])
-    def suborganizaciones(self, request, pk=None):
-        filtered = SubOrganization.objects.filter(id_organization=pk)
-        page = self.paginate_queryset(filtered)
-        if page is not None:
-            serializer = SubOrganizationSerializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-        serializer = SubOrganizationSerializer(filtered, many=True)
-        return Response(serializer.data)
 
     def list(self, request, *args, **kwargs):
 
@@ -83,12 +75,19 @@ class OrganizationViewset(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         only = params.get('only')
         if only is not None:
-            datos = serializer.data
-            if only in datos[0].keys():
-                filtrado = [organizacion[only] for organizacion in datos]
-                return Response(filtrado)
-        return Response(serializer.data)
+            try:
+                return Response(queryset.values_list(only))
+            except FieldError:
+                return Response({"request": "field not found"})
+        else:
+            return Response(serializer.data)
 
+
+class AllMembersByOrgViewSet(viewsets.ModelViewSet):
+    serializer_class = AllMembersByOrgSerializer
+    def retrive(self, request, pk=None):
+        queryset=SubOrganization.objects.filter(id_organization=pk).values('sub_org_id','name','members')
+        return Response(queryset)
 
 class OrganizationList(APIView):
     # permission_classes = [permissions.IsAuthenticated]
@@ -137,7 +136,8 @@ class OrganizationDetail(APIView):
 class SubOrganizationViewset(viewsets.ModelViewSet):
     serializer_class = SubOrganizationSerializer
     queryset = SubOrganization.objects.all()
-
+    filter_backends=[filters.SearchFilter]
+    search_fields = ['id_organization__abbreviation']
 
 class SubOrganizationList(APIView):
     #permission_classes = [permissions.IsAuthenticated]

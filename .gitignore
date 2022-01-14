@@ -131,3 +131,10 @@ dmypy.json
 .sqlite3
 
 .vscode/**
+
+
+#Python venv
+
+/Scripts
+
+*.cfg

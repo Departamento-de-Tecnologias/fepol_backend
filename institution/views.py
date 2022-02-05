@@ -19,7 +19,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 class FacultyViewset(viewsets.ModelViewSet):
     serializer_class = FacultySerializer
     queryset = Faculty.objects.all()
-
+    pagination_class = None
 
 class FacultyList(APIView):
     #permission_classes = [permissions.IsAuthenticated]

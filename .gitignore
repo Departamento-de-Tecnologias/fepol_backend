@@ -131,7 +131,7 @@ dmypy.json
 .sqlite3
 
 .vscode/**
-
+*.code-workspace
 
 #Python venv
 

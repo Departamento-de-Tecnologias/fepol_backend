@@ -21,7 +21,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 class FacultyViewset(viewsets.ModelViewSet):
     serializer_class = FacultySerializer
     queryset = Faculty.objects.all()
-    #permission_classes = [permissions.IsAuthenticated]
+    pagination_class = None
 
 
 class CareerViewset(viewsets.ModelViewSet):

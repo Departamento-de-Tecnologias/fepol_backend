@@ -9,6 +9,7 @@ from user.auth.BearerAuthentication import BearerAuthentication
 from rest_framework import exceptions
 
 from rest_framework.views import APIView
+from rest_framework import viewsets
 from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework import status
@@ -18,80 +19,32 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 auth_service = AuthService()
 person_service = PersonService()
 
-class PersonList(APIView):
-    permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request, format=None):
-        queryset = Person.objects.all()
-        serializer = PersonManagerSerializer(queryset, many=True)
-        return Response(serializer.data)
 
-    def post(self, request, format=None):
-        serializer = PersonManagerSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class ProfessorList(APIView):
+class PersonViewset(viewsets.ModelViewSet):
     #permission_classes = [permissions.IsAuthenticated]
+    serializer_class = PersonManagerSerializer
+    queryset = Person.objects.all()
 
-    def get(self, request, format=None):
-        queryset = Professor.objects.all()
-        serializer = ProfessorManagerSerializer(queryset, many=True)
-        return Response(serializer.data)
+class ProfessorViewset(viewsets.ModelViewSet):
+    #permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ProfessorManagerSerializer
+    queryset = Professor.objects.all()
 
-    def post(self, request, format=None):
-        serializer = ProfessorManagerSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class StudentViewset(viewsets.ModelViewSet):
+    #permission_classes = [permissions.IsAuthenticated]
+    serializer_class = StudentManagerSerializer
+    queryset = Student.objects.all()
 
-class StudentList(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+class MemberViewset(viewsets.ModelViewSet):
+    #permission_classes = [permissions.IsAuthenticated]
+    serializer_class = MemberSerializer
+    queryset = Member.objects.all()
 
-    def get(self, request, format=None):
-        queryset = Student.objects.all()
-        serializer = StudentManagerSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def post(self, request, format=None):
-        serializer = StudentManagerSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class MemberList(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get(self, request, format=None):
-        queryset = Member.objects.all()
-        serializer = MemberSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def post(self, request, format=None):
-        serializer = MemberSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class MemberRoleList(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get(self, request, format=None):
-        queryset = MemberRole.objects.all()
-        serializer = MemberRoleSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def post(self, request, format=None):
-        serializer = MemberRoleSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class MemberRolViewset(viewsets.ModelViewSet):
+    #permission_classes = [permissions.IsAuthenticated]
+    serializer_class = MemberRoleSerializer
+    queryset = MemberRole.objects.all()
 
 
 class AuthToken(APIView):
@@ -118,7 +71,7 @@ class PersonView(APIView):
     def post(self, request):
         return Response(data=person_service.create(request.data))
     
-    def put(self, request):
+    def put(self, request, pk):
         return Response(data=person_service.update(request.data))
     
     def delete(self, request, pk):

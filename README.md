@@ -9,4 +9,5 @@ Django REST Framework
 ## Equipo
 ```
 Jeffrey Prado
+Erick Lino
 ```
